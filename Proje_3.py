@@ -3,8 +3,6 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import cosine_similarity
 import os
-import pygame
-from pygame import mixer
 import time
 import librosa
 import librosa.display
@@ -38,26 +36,6 @@ def important_variables(dataframe):
     onemli_degiskenler = min_max_diff_df.iloc[:, 0].tolist()
     return onemli_degiskenler
 
-
-
-# def important_variables(dataframe, correlation_threshold = 0.5, drop=False):
-#     if drop:
-#         correlation_matrix = dataframe.drop([i for i in dataframe.columns if df[i].dtype == 'O'], axis=1).corr()
-#     else:
-#         correlation_matrix = dataframe.corr()
-#     important_variables = set()
-#     for column in correlation_matrix.columns:
-#         correlated_variables = correlation_matrix.index[correlation_matrix[column] > correlation_threshold].tolist()
-#         important_variables.add(column)
-#         important_variables.update(correlated_variables)
-#     onemli_degiskenler = sorted(important_variables, key=lambda x: sum(correlation_matrix[x] > correlation_threshold),reverse=True)
-#     return onemli_degiskenler
-
-#
-# onemli_degiskenler = important_variables(df)
-#
-# girdi = 'enis'
-
 def normalize_et(girdi,onemli_degiskenler):
     girdi = girdi.lower().replace(" ", "").replace("w", "v").replace("q", "k").replace("x", "h")
     mapping = {k: v for v, k in enumerate("abcçdefgğhıijklmnoöprsştuüvyz", 1)}
@@ -73,7 +51,6 @@ def normalize_et(girdi,onemli_degiskenler):
             sayi_list.append(girdi_list[j])
     return sayi_list
 
-# girdi_normalize = normalize_et(girdi,onemli_degiskenler)
 
 
 def model_set(dataframe,variable,sayi_list,onemli_degiskenler):
@@ -90,9 +67,6 @@ def model_set(dataframe,variable,sayi_list,onemli_degiskenler):
     return new_df_no_duplicates
 
 
-
-# new_df_no_duplicates = model_set(df,"Dosya",girdi_normalize,onemli_degiskenler)
-# clean_df yerine akış bozulmasın diye new_df_no_duplicates kullandım
 def clean_df(dataframe, new_df_no_duplicates,threshold=0.9):
     clean_df = dataframe.loc[new_df_no_duplicates.index]
     numerical_columns = clean_df.select_dtypes(include=['float64']).columns
@@ -104,8 +78,6 @@ def clean_df(dataframe, new_df_no_duplicates,threshold=0.9):
     clean_df = clean_df.drop(index=rows_to_drop).reset_index(drop=True)
     return clean_df
 
-# new_df_no_duplicates=clean_df(df,new_df_no_duplicates)
-# clean_df yerine akış bozulmasın diye new_df_no_duplicates kullandım
 def file_names(new_df_no_duplicates,variable,threshold=0.7):
     file_names = new_df_no_duplicates[variable].tolist()
     vectorizer = CountVectorizer()
@@ -119,10 +91,6 @@ def file_names(new_df_no_duplicates,variable,threshold=0.7):
     new_df_no_duplicates = new_df_no_duplicates.drop(index=rows_to_drop).reset_index(drop=True)
     return new_df_no_duplicates
 
-#
-# new_df_no_duplicates = file_names(new_df_no_duplicates,"Dosya")
-# play(new_df_no_duplicates,"proje")
-# clean_df yerine akış bozulmasın diye new_df_no_duplicates kullandım
 def data_prep(dataframe, girdi,variable):
     onemli_degiskenler = important_variables(dataframe)
     sayi_list = normalize_et(girdi,onemli_degiskenler)
@@ -131,35 +99,11 @@ def data_prep(dataframe, girdi,variable):
     new_df_no_duplicates = file_names(new_df_no_duplicates,variable,threshold=0.7)
     return new_df_no_duplicates
 
-# new_df_no_duplicates = data_prep(df, girdi, 'filename')
+
 def create_music_list(new_df_no_duplicates):
     music_list = [j[0] for i, j in enumerate(new_df_no_duplicates.values.tolist()) if i < 3]
     return music_list
-    # music_folder = path
-    # music_list = [music_folder + "/" + i for i in liste]
-    # return music_list
-#
-# music_list = create_music_list(new_df_no_duplicates)
-#
-#
-# for i in music_list:
-#     print(i)
 
-
-def Waveform(music):
-    y, sr = librosa.load(music)
-
-    # Librosa.display.waveshow ile ses dalgasını görselleştir
-    fig, ax = plt.subplots(figsize=(10, 4))
-    librosa.display.waveshow(y, sr=sr, ax=ax)
-    plt.title('Waveform')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-    plt.tight_layout()
-    # Matplotlib plotunu Streamlit'e göm
-    st.pyplot(fig)
-
-# proje(df,'enis', 'filename',"proje")
 
 
 degıskenler =  {"Dosya": "Şarkı isimleri",
@@ -180,65 +124,3 @@ degıskenler =  {"Dosya": "Şarkı isimleri",
                 "Music Genre":"Şarkının müzik türünü ifade eden etiket. Bu etiket, veri setinizde ki her şarkının hangi müzik türüne ait olduğunu belirten değişkendir."}
 
 
-
-
-# def play(new_df_no_duplicates,path):
-#     liste = [j[0] for i, j in enumerate(new_df_no_duplicates.values.tolist()) if i < 3]
-#     music_folder = path
-#     music_list = [music_folder + "/" + i for i in liste]
-#     mixer.init()
-#     mixer.music.set_volume(0.7)
-#     for i in range(len(music_list)):
-#         print("********************************************************************")
-#         madalya = ["🥇", "🥈", "🥉"]
-#
-#         # Dosya adının yanına tam yolu ekleyin ve sadece dosya adını alın
-#         full_path = music_list[i]
-#         music_name = re.sub(r'^\s*[0-9]+\s*\.\s*', '',os.path.basename(full_path))  # Başındaki sayıları ve noktaları kaldır
-#         music_name = re.sub(r'^\s*\d+\s*', '', music_name)  # Sadece başındaki sayıları kaldır
-#         music_name = re.sub(r'^\s*-\s*', '', music_name)  # Başındaki tire işaretini kaldır
-#
-#         print(f"{i + 1}. Öneri {madalya[i]}: {music_name} dinliyorsunuz 🎶")
-#
-#         mixer.init()  # mixer'ı başlatın (yeni bir inisalizasyon)
-#         mixer.music.load(full_path)
-#         mixer.music.play(start=10)
-#         time.sleep(15)
-#         mixer.music.stop()
-#         print("                                                 Müzik bitti 🔇")
-#
-#     print("********************************************************************")
-#     print("Copyright by DATABand \sizin için çalmaya devam edeceğiz... 🎼")
-#     print("********************************************************************")
-
-
-# def equalize_audio(audio_file, gain):
-#     # Ses dosyasını yükle
-#     sound = AudioSegment.from_file(audio_file)
-#
-#     # Ses seviyesini eşitle
-#     samples = np.array(sound.get_array_of_samples())
-#     equalized_samples = samples * gain
-#
-#     # Yeni bir ses dosyası oluştur
-#     equalized_sound = AudioSegment(
-#         equalized_samples.tobytes(),
-#         frame_rate=sound.frame_rate,
-#         sample_width=sound.sample_width,
-#         channels=sound.channels
-#     )
-#
-#     return equalized_soun
-
-# def visualize_spectrogram(path):
-#     # Ses dosyasını yükle
-#     y, sr = librosa.load(path)
-#
-#     # Spektrogram oluştur
-#     D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
-#
-#     # Spektrogramu görselleştir
-#     plt.figure(figsize=(10, 4))
-#     librosa.display.specshow(D, sr=sr, x_axis='time', y_axis='log')
-#     plt.colorbar(format='%+2.0f dB')
-#     st.pyplot()
