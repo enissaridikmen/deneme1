@@ -12,7 +12,7 @@ statsmodels==0.14.0
 scipy==1.10.1
 joblib==1.2.0
 pydotplus==2.0.2
-graphviz>=0.14
+graphviz==2.50.0
 skompiler==0.7
 regex==2022.7.9
 xgboost==2.0.2
